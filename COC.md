@@ -1,8 +1,6 @@
-=================
- Code of Conduct
-=================
+# Code of Conduct
 
-We endorse the `Invenio Community Code of Conduct `:
+We endorse the [Invenio Community Code of Conduct](https://github.com/inveniosoftware/invenio/blob/3868014caa108521681a8f99fe7157c7fec33c67/docs/community/code-of-conduct.rst):
 
    The Tibor community is made up of members from around the globe
    with a diverse set of skills, personalities, and experiences.  It is
@@ -40,9 +38,8 @@ We endorse the `Invenio Community Code of Conduct `:
    not because we have to, but because we want to.  If we remember
    that, these guidelines will come naturally.
 
-We recommend the "egoless" programming principles (Gerald Weinberg,
-`The Psychology of Computer Programming
-<http://en.wikipedia.org/wiki/Special:BookSources/0-932633-42-0>`_,
+We recommend the "egoless" programming principles (Gerald Weinberg, [The
+Psychology of Computer Programming](http://en.wikipedia.org/wiki/Special:BookSources/0-932633-42-0>),
 1971):
 
    1. **Understand and accept that you will make mistakes.** The point
