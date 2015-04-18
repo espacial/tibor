@@ -49,7 +49,8 @@ struct conf
 	struct list* mushrooms;  
 };
 
-int load_conf(char* file_path, struct conf* config);
+struct conf*
+load_conf(char* file_path);
 /* static int action_behavior(const char* behavior); */
 /* static int load_configuration (char* file_name, json_t** configuration); */
 
