@@ -1,5 +1,5 @@
-cflags = -Wall -Wextra -ansi -pedantic -Isrc/
-ldflags = -ljansson
+cflags = -Wall -Wextra -Isrc/ -I/usr/local/include
+ldflags = -L/usr/local/lib -ljansson
 
 rule compile
  command = clang $cflags -c $in -o $out
