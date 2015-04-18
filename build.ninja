@@ -1,0 +1,13 @@
+cflags = -Wall -Wextra -ansi -pedantic 
+
+
+rule compile
+ command = clang $cflags -c $in -o $out
+
+rule link
+ command = clang -o $out $in 
+
+build bin/tibord: link obj/main.o 
+
+build obj/main.o: compile src/main.c
+
