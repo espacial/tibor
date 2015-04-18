@@ -86,7 +86,7 @@ main(int argc, char* argv[])
 	struct tib_request req;
 	struct tib_response res;
 	struct tib_file tf;
-	struct conf config;
+	struct conf *config;
 
 	if (instance_exists())
 	{
@@ -96,9 +96,16 @@ main(int argc, char* argv[])
 	
 	if (argc > 0)
 	{
-		if (load_conf(argv[1], &config) == TIBOR_OK)
+		if ((config = load_conf(argv[1])) != NULL)
 		{
 			/* PUT STUFF INTO L2 */
+			struct list* runner;
+			for (runner = config->mushrooms; runner != NULL; )
+			{
+				struct mushroom_conf* mc = list_data(runner);
+				printf("MC: %s\n", mc->file_path);
+				runner = list_next(runner);
+			}
 		}
 		else
 		{
