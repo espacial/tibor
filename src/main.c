@@ -22,8 +22,12 @@
 #include "list.h"
 #include "dump.h"
 
-key_t key;
-int mq_id;
+key_t key_req;
+int mq_req;
+
+key_t key_res;
+int mq_res;
+
 int key_fd;
 struct l1_entry l1[10];
 struct trie* l2;
@@ -60,7 +64,7 @@ instance_exists(void)
 }
 
 static void
-create_message_queue(void)
+create_message_queues(void)
 {
 	/* if ((key_fd = open("/var/run/tibor.mq", O_CREAT | O_RDWR)) == -1) */
 	/* { */
@@ -80,8 +84,15 @@ create_message_queue(void)
 	/* 	exit(1); */
 	/* } */
 
-	key = 111;
-	if ((mq_id = msgget(key, IPC_CREAT | 0777)) == -1)
+	key_req = 111;
+	if ((mq_req = msgget(key_req, IPC_CREAT | 0777)) == -1)
+	{
+		perror("msgget");	
+		exit(1);
+	}
+
+	key_res = 222;
+	if ((mq_res = msgget(key_res, IPC_CREAT | 0777)) == -1)
 	{
 		perror("msgget");	
 		exit(1);
@@ -129,10 +140,13 @@ main(int argc, char* argv[])
 	
 	if (argc > 1)
 	{
+		printf("Going to load conf.\n");
 		if ((config = load_conf(argv[1])) != NULL)
 		{
+			printf("After load.\n");
 			struct list* runner;
 			unsigned int l1_idx = 0;
+			key_t key = 400;
 			for (runner = config->mushrooms; runner != NULL; )
 			{
 				mc = list_data(runner);
@@ -143,21 +157,17 @@ main(int argc, char* argv[])
 				tf->l2_hits = 0;
 				tf->misses = 0;
 				tf->always_l1 = mc->on_l1;
+				snprintf(tf->path, 1024, "%s/%s", config->root, mc->file_path);
 
 				int shmid;
 				char* shmptr;
-				key_t key;
 				struct stat sb;
 
 				stat(tf->path, &sb);
 
-				if ((key = ftok(tf->path, 'a') == -1))
-				{
-					perror("ftok");
-					exit(1);
-				}
+				/* printf("%s\n", tf->path); */
 
-				if ((shmid = shmget(key, sb.st_size, IPC_CREAT | 0777)) == -1)
+				if ((shmid = shmget(key++, sb.st_size, IPC_CREAT | 0777)) == -1)
 				{
 					perror("shmget");
 					exit(1);
@@ -178,7 +188,6 @@ main(int argc, char* argv[])
 					shmptr[k] = buffer[0];
 				}
 
-				snprintf(tf->path, 1024, "%s/%s", config->root, mc->file_path);
 
 				if (tf->always_l1 == 1 && l1_idx < 10)
 				{
@@ -195,6 +204,8 @@ main(int argc, char* argv[])
 				files = list_add(files, to_add);
 
 				trie_set(l2, tf->path, tf);
+				/* trie_dump(l2); */
+
 
 				runner = list_next(runner);
 			}
@@ -206,16 +217,18 @@ main(int argc, char* argv[])
 		}
 	}
 
+	printf("Dumping the L2\n");
 	trie_dump(l2);
 
 	pthread_create(&dump_thread, NULL, dump_thread_fn, NULL);	
 	write_pid_file();
-	create_message_queue();
+	create_message_queues();
 	
 	for (;;)
 	{
 		printf("Waiting for a message...\n");
-		msgrcv(mq_id, &req, TIB_REQUEST_SIZE, 0, 0);
+		msgrcv(mq_req, &req, TIB_REQUEST_SIZE, 0, 0);
+		printf("Someone requested %s\n", req.key);
 
 		if (req.mtype == 1)
 		{
@@ -232,7 +245,9 @@ main(int argc, char* argv[])
 				res.offset = -1;
 			}
 
-			msgsnd(mq_id, &res, TIB_RESPONSE_SIZE, 0);
+			printf("%d, %d\n", res.shmid, res.offset);
+
+			msgsnd(mq_res, &res, TIB_RESPONSE_SIZE, 0);
 		}
 	}
 
