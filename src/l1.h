@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "file.h"
+
 struct l1_entry
 {
 	int32_t hash;
