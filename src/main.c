@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <sys/shm.h>
 
 #include <pthread.h>
 
@@ -142,6 +143,41 @@ main(int argc, char* argv[])
 				tf->l2_hits = 0;
 				tf->misses = 0;
 				tf->always_l1 = mc->on_l1;
+
+				int shmid;
+				char* shmptr;
+				key_t key;
+				struct stat sb;
+
+				stat(tf->path, &sb);
+
+				if ((key = ftok(tf->path, 'a') == -1))
+				{
+					perror("ftok");
+					exit(1);
+				}
+
+				if ((shmid = shmget(key, sb.st_size, IPC_CREAT | 0777)) == -1)
+				{
+					perror("shmget");
+					exit(1);
+				}
+
+				if ((shmptr = shmat(shmid, NULL, 0)) == (char*)-1)
+				{
+					perror("shmat");	
+					exit(1);
+				}
+
+				tf->fd = open(tf->path, O_RDWR);
+				unsigned int k;
+				for (k = 0; k < sb.st_size; k++)
+				{
+					char buffer[1];
+					read(tf->fd, buffer, 1);
+					shmptr[k] = buffer[0];
+				}
+
 				snprintf(tf->path, 1024, "%s/%s", config->root, mc->file_path);
 
 				if (tf->always_l1 == 1 && l1_idx < 10)
