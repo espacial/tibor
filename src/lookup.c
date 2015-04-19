@@ -33,7 +33,27 @@ lookup(char* key, struct l1_entry* l1, struct trie* l2, struct tib_file* tf_out,
 	printf("Looking into L2\n");
 	/* L2 */
 	if (trie_get(l2, key, &tf_out) == TRIE_FOUND)
+	{
+		unsigned int idx = 0;
+		unsigned int lowest_hits = l1[0].file->l1_hits + l1[0].file->l2_hits;
+		unsigned int i;
+
+		for (i = 0; i < 10; i++)
+		{
+			if (l1[i].file->l1_hits + l1[i].file->l2_hits < lowest_hits && l1[i].file->always_l1 != 1)
+			{
+				lowest_hits = l1[i].file->l1_hits + l1[i].file->l2_hits;
+				idx = i;
+			}
+		}
+
+		l1[idx].key = strdup(key);
+		l1[idx].length = strlen(key);
+		l1[idx].hash = l1_hash(l1[idx].key, l1[idx].length);
+		l1[idx].file = tf_out;
+
 		return TIBOR_FOUND;
+	}
 
 	printf("Logging a miss\n");
 	/* MISS */
