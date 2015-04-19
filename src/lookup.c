@@ -4,7 +4,12 @@
 #include "lookup.h"
 
 int 
-lookup(char* key, struct l1_entry* l1, struct trie* l2, struct tib_file* tf_out, struct list** files, struct trie* miss)
+lookup(char* key,
+       struct l1_entry* l1,
+       struct trie* l2,
+       struct tib_file* tf_out,
+       struct list** files,
+       struct trie* miss)
 {
 	unsigned int i;
 	int64_t key_hash;
