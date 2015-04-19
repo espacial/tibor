@@ -26,6 +26,7 @@ int mq_id;
 int key_fd;
 struct l1_entry l1[10];
 struct trie* l2;
+struct trie* miss;
 struct list* files;
 pthread_t dump_thread;
 
@@ -113,7 +114,11 @@ main(int argc, char* argv[])
 	struct mushroom_conf* mc;
 	pthread_t dump_thread;
 
+	daemon(0, 1);
+
 	files = NULL;
+	l2 = trie_create();
+	miss = trie_create();
 
 	if (instance_exists())
 	{
@@ -125,7 +130,6 @@ main(int argc, char* argv[])
 	{
 		if ((config = load_conf(argv[1])) != NULL)
 		{
-			/* PUT STUFF INTO L2 */
 			struct list* runner;
 			for (runner = config->mushrooms; runner != NULL; )
 			{
@@ -142,7 +146,9 @@ main(int argc, char* argv[])
 				struct list* to_add;
 				to_add = list_create(tf);
 				files = list_add(files, to_add);
-				
+
+				trie_set(l2, tf->path, tf);
+
 				runner = list_next(runner);
 			}
 		}
@@ -153,7 +159,8 @@ main(int argc, char* argv[])
 		}
 	}
 
-	daemon(0, 1);
+	trie_dump(l2);
+
 	pthread_create(&dump_thread, NULL, dump_thread_fn, NULL);	
 	write_pid_file();
 	create_message_queue();
@@ -167,7 +174,7 @@ main(int argc, char* argv[])
 		{
 			res.mtype = 1;
 
-			if (lookup(req.key, l1, l2, &tf) == TIBOR_FOUND)
+			if (lookup(req.key, l1, l2, &tf, &files, miss) == TIBOR_FOUND)
 			{
 				res.shmid = tf.shmid;
 				res.offset = tf.offset;
