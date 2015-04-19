@@ -3,6 +3,8 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+#include <pthread.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,12 +18,16 @@
 #include "request.h"
 #include "response.h"
 #include "trie.h"
+#include "list.h"
+#include "dump.h"
 
 key_t key;
 int mq_id;
 int key_fd;
 struct l1_entry l1[10];
 struct trie* l2;
+struct list* files;
+pthread_t dump_thread;
 
 static void
 write_pid_file(void)
@@ -80,6 +86,23 @@ create_message_queue(void)
 	}
 }
 
+static void*
+dump_thread_fn(void* arg)
+{
+	(void)arg;
+
+	printf("A\n");
+
+	for (;;)
+	{
+		printf("B\n");
+		dump("/var/log/tibor.dump", files);
+		sleep(10);
+	}
+
+	printf("C\n");
+}
+
 int
 main(int argc, char* argv[])
 {
@@ -87,6 +110,10 @@ main(int argc, char* argv[])
 	struct tib_response res;
 	struct tib_file tf;
 	struct conf *config;
+	struct mushroom_conf* mc;
+	pthread_t dump_thread;
+
+	files = NULL;
 
 	if (instance_exists())
 	{
@@ -102,8 +129,20 @@ main(int argc, char* argv[])
 			struct list* runner;
 			for (runner = config->mushrooms; runner != NULL; )
 			{
-				struct mushroom_conf* mc = list_data(runner);
-				printf("MC: %s\n", mc->file_path);
+				mc = list_data(runner);
+
+				struct tib_file* tf;
+				tf = malloc(sizeof(struct tib_file));
+				tf->l1_hits = 0;
+				tf->l2_hits = 0;
+				tf->misses = 0;
+				tf->always_l1 = mc->on_l1;
+				snprintf(tf->path, 1024, "%s/%s", config->root, mc->file_path);
+
+				struct list* to_add;
+				to_add = list_create(tf);
+				files = list_add(files, to_add);
+				
 				runner = list_next(runner);
 			}
 		}
@@ -115,6 +154,7 @@ main(int argc, char* argv[])
 	}
 
 	daemon(0, 1);
+	pthread_create(&dump_thread, NULL, dump_thread_fn, NULL);	
 	write_pid_file();
 	create_message_queue();
 	
