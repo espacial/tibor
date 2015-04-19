@@ -31,6 +31,7 @@ lookup(char* key,
 		 && (strcmp(entry->key, key) == 0))
 		{
 			*tf_out = *entry->file;	
+			tf_out->l1_hits++;
 			return TIBOR_FOUND;
 		}
 	}
@@ -56,6 +57,8 @@ lookup(char* key,
 		l1[idx].length = strlen(key);
 		l1[idx].hash = l1_hash(l1[idx].key, l1[idx].length);
 		l1[idx].file = tf_out;
+
+		tf_out->l2_hits++;
 
 		return TIBOR_FOUND;
 	}
