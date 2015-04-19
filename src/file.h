@@ -1,6 +1,8 @@
 #ifndef TIB_FILE_H
 #define TIB_FILE_H
 
+#include <sys/ipc.h>
+
 #include <stdint.h>
 
 struct tib_file
@@ -8,7 +10,7 @@ struct tib_file
 	char path[1024];
 	int fd;
 
-	int shmid;
+	key_t key;
 	uint64_t offset;
 
 	uint8_t always_l1;
