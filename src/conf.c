@@ -59,7 +59,7 @@ load_conf(char* file_path)
 	if (configuration == NULL)
 		return NULL;
 
-	value = json_object_get(configuration, "path");
+	value = json_object_get(configuration, "root");
 	strncpy(config->root, json_string_value(value), strlen(json_string_value(value)));
 	
 	value = json_object_get(configuration, "l1_size");
