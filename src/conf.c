@@ -33,6 +33,11 @@ load_json_file(char* path)
 	config = json_loadf(fp, 0, &error);
 	fclose(fp);
 
+	if (config == NULL)
+	{
+		printf("%s\n", error.text);
+	}
+
 	return config;
 }
 
