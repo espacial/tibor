@@ -114,7 +114,7 @@ main(int argc, char* argv[])
 	struct mushroom_conf* mc;
 	pthread_t dump_thread;
 
-	daemon(0, 1);
+	daemon(1, 1);
 
 	files = NULL;
 	l2 = trie_create();
@@ -126,11 +126,12 @@ main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 	
-	if (argc > 0)
+	if (argc > 1)
 	{
 		if ((config = load_conf(argv[1])) != NULL)
 		{
 			struct list* runner;
+			unsigned int l1_idx = 0;
 			for (runner = config->mushrooms; runner != NULL; )
 			{
 				mc = list_data(runner);
@@ -142,6 +143,16 @@ main(int argc, char* argv[])
 				tf->misses = 0;
 				tf->always_l1 = mc->on_l1;
 				snprintf(tf->path, 1024, "%s/%s", config->root, mc->file_path);
+
+				if (tf->always_l1 == 1 && l1_idx < 10)
+				{
+					l1[l1_idx].file = tf;
+					l1[l1_idx].key = strdup(tf->path);
+					l1[l1_idx].length = strlen(tf->path);
+					l1[l1_idx].hash = l1_hash(l1[l1_idx].key, l1[l1_idx].length);
+
+					l1_idx++;
+				}
 
 				struct list* to_add;
 				to_add = list_create(tf);
