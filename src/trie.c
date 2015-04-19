@@ -3,13 +3,13 @@
 static int
 level_hash (char key)
 {
-	if (key == '-')
+	if (key == '.')
 		return 0;
 	
 	if (key == '_')
 		return 1;
 
-	if (key == ' ')
+	if (key == '/')
 		return 2;
 
 	if (key >= 'a' && key <= 'z')
