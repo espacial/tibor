@@ -18,6 +18,9 @@ level_hash (char key)
 	if (key >= 'A' && key <= 'Z')
 		return (key - 'A') + 3 + 26;
 
+	if (key >= '0' && key <= '9')
+		return (key - 'A') + 3 + 26 + 26;
+
 	return -1;
 }
 

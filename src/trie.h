@@ -12,7 +12,7 @@
 #define TRIE_FOUND 0
 #define TRIE_NOT_FOUND 1
 #define TRIE_KEY_INVALID 2
-#define TRIE_KEY_SET_SIZE 55
+#define TRIE_KEY_SET_SIZE 65
 
 struct trie
 {
