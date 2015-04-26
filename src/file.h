@@ -11,7 +11,7 @@ struct tib_file
 	int fd;
 
 	key_t key;
-	uint64_t offset;
+	uint64_t length;
 
 	uint8_t always_l1;
 

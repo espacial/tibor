@@ -7,7 +7,8 @@ struct tib_response
 {
 	long mtype;
 	key_t key;
-	uint64_t offset;
+	uint64_t length;
+	int success;
 };
 
 #define TIB_RESPONSE_SIZE (sizeof(struct tib_response) - sizeof(long))

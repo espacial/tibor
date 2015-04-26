@@ -7,7 +7,7 @@ int
 lookup(char* key,
        struct l1_entry* l1,
        struct trie* l2,
-       struct tib_file* tf_out,
+       struct tib_file** tf_out,
        struct list** files,
        struct trie* miss)
 {
@@ -20,25 +20,27 @@ lookup(char* key,
 	key_length = strlen(key);
 	key_hash = l1_hash(key, key_length);
 
-	printf("Looking into L1\n");
+	printf("Looking into L1 for %d\n", key_hash);
 	/* L1 */
 	for (i = 0; i < 10; i++)
 	{
 		entry = &l1[i];
-
+		printf("entry_hash %d\n", entry->hash);
 		if ((entry->hash == key_hash)
 		 && (entry->length == key_length)
 		 && (strcmp(entry->key, key) == 0))
 		{
-			*tf_out = *entry->file;	
-			tf_out->l1_hits++;
+			*tf_out = entry->file;
+			printf("%d\n", entry->file->key);
+			printf("entry->file %d\n", *entry->file);	
+			(*tf_out)->l1_hits++;
 			return TIBOR_FOUND;
 		}
 	}
 
 	printf("Looking into L2\n");
 	/* L2 */
-	if (trie_get(l2, key, &tf_out) == TRIE_FOUND)
+	if (trie_get(l2, key, tf_out) == TRIE_FOUND)
 	{
 		unsigned int idx = 0;
 		unsigned int lowest_hits = l1[0].file->l1_hits + l1[0].file->l2_hits;
@@ -56,9 +58,9 @@ lookup(char* key,
 		l1[idx].key = strdup(key);
 		l1[idx].length = strlen(key);
 		l1[idx].hash = l1_hash(l1[idx].key, l1[idx].length);
-		l1[idx].file = tf_out;
+		l1[idx].file = *tf_out;
 
-		tf_out->l2_hits++;
+		(*tf_out)->l2_hits++;
 
 		return TIBOR_FOUND;
 	}

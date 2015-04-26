@@ -2,7 +2,7 @@
 #define TRIE_H
 
 #include <sys/types.h>
-#include <sys/stdint.h>
+#include <stdint.h>
 
 #include <stdlib.h>
 #include <stdio.h>
