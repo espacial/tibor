@@ -1,0 +1,19 @@
+cflags = -Wall -Wextra -Isrc/ -I/usr/local/include -pthread
+ldflags = -pthread -L/usr/local/lib -ljansson
+
+rule compile
+ command = clang $cflags -c $in -o $out
+
+rule link
+ command = clang -o $out $in $ldflags
+
+build bin/tibord: link obj/main.o obj/trie.o obj/l1.o obj/lookup.o obj/list.o obj/conf.o obj/dump.o
+
+build obj/main.o: compile src/main.c
+build obj/trie.o: compile src/trie.c
+build obj/l1.o: compile src/l1.c
+build obj/lookup.o: compile src/lookup.c
+build obj/list.o: compile src/list.c
+build obj/conf.o: compile src/conf.c
+build obj/dump.o: compile src/dump.c
+
